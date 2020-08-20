@@ -9,10 +9,18 @@ import pandas
 import os.path
 from os import path
 
-'''
-value = "Barcelona"
-value_2 = "Arsenal"
+#Prints stats to a csv file, and returns True; if game already is already saved, returns False
+def stats_to_csv(stat_list, team_name):
+    date = stat_list[0][0][:10].replace(".", "-")
+    file_name = "data/{}-{}.csv".format(team_name, date)      #Assembles filename
+    frame = pandas.DataFrame.from_records(stat_list[1:], columns = ["category", *stat_list[0][1:]])
+    if not path.exists(file_name):
+        frame.to_csv(file_name, index = False)
+        return True
+    else:
+        return False
 
+#Visits a page and scraps match stats, returns list with stats
 def get_match_stats(page):
     browser = webdriver.Firefox()
     browser.get(page)
@@ -34,8 +42,8 @@ def get_match_stats(page):
     browser.quit()
     return medium_list
 
-
-def get_match_history(team):
+#Updates match history files, adding games that aren't saved yet
+def update_match_history(team):
         
     #Creates a browser and visits flashscore webpace
     browser = webdriver.Firefox()
@@ -72,21 +80,11 @@ def get_match_history(team):
 
     #Visits every game stats site and scraps data into lists (huge_list)
     stat_list = []
-    for page in game_links[:5]:                  #Changes the order of data (more organised)
+    for page in game_links[:20]:                  
+        statistics = get_match_stats(page)
+        if not stats_to_csv(statistics, team):
+            break
         stat_list.append(get_match_stats(page))
     browser.quit()
     return stat_list
-'''
-
-
-#Prints stats to a csv file, and returns True; if game already is already saved, returns False
-def stats_to_csv(stat_list, team_name):
-    date = stat_list[0][0][:10].replace(".", "-")
-    file_name = "data/{}-{}.csv".format(team_name, date)      #Assembles filename
-    frame = pandas.DataFrame.from_records(stat_list[1:], columns = ["category", *stat_list[0][1:]])
-    if not path.exists(file_name):
-        frame.to_csv(file_name, index = False)
-        return True
-    else:
-        return False
 
