@@ -33,7 +33,7 @@ def get_match_history(team):
     #Shows more matches
     show_matches = browser.find_element_by_css_selector(".event__more")
     show_matches.click()
-    browser.implicitly_wait(1) #wait for 2 secords(maybe 1 second is enough??)
+    browser.implicitly_wait(1)
 
     #Extracts game id's into a list of links
     games = browser.find_elements_by_class_name("event__match")
@@ -44,12 +44,16 @@ def get_match_history(team):
 
     #Visits every game stats site and scraps data into lists (huge_list)
     huge_list = []
-    for page in game_links:
+    for page in game_links[:10]:
         browser.get(page)
-        element = browser.find_elements_by_class_name("statTextGroup")  #Necessary, not sure why
+        element = browser.find_elements_by_class_name("statTextGroup")      #Necessary, not sure why
         soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
         tag = soup.find_all('div', {"class": "statTextGroup"})
-        medium_list = []
+        imena = soup.find_all('div', {"class": "tname__text"})              #Finds team names
+        match_time = soup.find_all('div', {"class": "description__time"})   #Finds match date and time
+        rezultat = soup.find_all('span', {"class": "scoreboard"})           #Finds match result
+        medium_list = [[imena[0].text.strip(), match_time[0].text.strip(), imena[1].text.strip()],
+        [rezultat[0].text.strip(), "result", rezultat[1].text.strip()]]     #Createst a list for stats
         for el in tag:      #Loops through all divs with stat. data and extracts it
             stat = []
             mini_list = el.find_all('div')
@@ -59,9 +63,3 @@ def get_match_history(team):
         huge_list.append(medium_list)
     browser.quit()
     return huge_list
-
-history_1 = get_match_history(value)
-
-
-
-
