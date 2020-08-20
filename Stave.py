@@ -6,7 +6,10 @@ import requests
 import time
 import csv
 import pandas
+import os.path
+from os import path
 
+'''
 value = "Barcelona"
 value_2 = "Arsenal"
 
@@ -73,6 +76,17 @@ def get_match_history(team):
         stat_list.append(get_match_stats(page))
     browser.quit()
     return stat_list
+'''
 
 
+#Prints stats to a csv file, and returns True; if game already is already saved, returns False
+def stats_to_csv(stat_list, team_name):
+    date = stat_list[0][0][:10].replace(".", "-")
+    file_name = "data/{}-{}.csv".format(team_name, date)      #Assembles filename
+    frame = pandas.DataFrame.from_records(stat_list[1:], columns = ["category", *stat_list[0][1:]])
+    if not path.exists(file_name):
+        frame.to_csv(file_name, index = False)
+        return True
+    else:
+        return False
 
