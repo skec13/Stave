@@ -35,7 +35,7 @@ def get_match_history(team):
     huge_list = []
     for page in game_links:
         browser.get(page)
-        element = browser.find_elements_by_class_name("statTextGroup")  #Unnecessary?
+        element = browser.find_elements_by_class_name("statTextGroup")  #Necessary, not sure why
         soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
         tag = soup.find_all('div', {"class": "statTextGroup"})
         medium_list = []
