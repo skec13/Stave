@@ -9,14 +9,13 @@ import pandas
 import os.path
 from os import path
 
+#Converts date into desired format
 def pretvorba_datum(datum):
     datum = datum.split('.')
     return(datum[2]+'-'+datum[1]+'-'+datum[0])
 
-
 # Prints stats to a csv file, and returns True; if game already is already saved, returns False
 def stats_to_csv(stat_list, team_name):
-    #date = stat_list[0][0][:10].replace(".", "-") to gre vn ane?
     file_name = "data/{}-{}.csv".format(team_name, pretvorba_datum(date))  # Assembles filename
     frame = pandas.DataFrame.from_records(stat_list[1:], columns=["category", *stat_list[0][1:]])
     if not path.exists(file_name):
@@ -60,7 +59,8 @@ def update_match_history(team):
     cookies.click()
     browser.implicitly_wait(2)
 
-    # Identifies search button, searches for desired team, heads to team page
+
+    #Identifies search button, searches for desired team, heads to team page
     search_button = browser.find_element_by_css_selector(".header__buttonIcon--search")
     search_button.click()
     search_bar = browser.find_element_by_css_selector("#search-form-query")
@@ -71,7 +71,7 @@ def update_match_history(team):
     result_element.click()
     browser.implicitly_wait(2)
 
-    # Shows more matches
+    #Shows more matches
     show_matches = browser.find_element_by_css_selector(".event__more")
     show_matches.click()
     browser.implicitly_wait(1)
