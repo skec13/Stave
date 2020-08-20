@@ -1,13 +1,36 @@
 from selenium import webdriver
-import bs4
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
+import bs4
 import requests
 import time
+import csv
+import pandas
 
 value = "Barcelona"
 value_2 = "Arsenal"
+
+def get_match_stats(page):
+    browser = webdriver.Firefox()
+    browser.get(page)
+    element = browser.find_elements_by_class_name("statTextGroup")      #Necessary, not sure why
+    browser.implicitly_wait(50)
+    soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
+    tag = soup.find_all('div', {"class": "statTextGroup"})
+    imena = soup.find_all('div', {"class": "tname__text"})              #Finds team names
+    match_time = soup.find_all('div', {"class": "description__time"})   #Finds match date and time
+    rezultat = soup.find_all('span', {"class": "scoreboard"})           #Finds match result
+    medium_list = [[match_time[0].text.strip(), imena[0].text.strip(), imena[1].text.strip()],
+    ["result", rezultat[0].text.strip(), rezultat[1].text.strip()]]     #Createst a list for stats
+    for el in tag:      #Loops through all divs with stat. data and extracts it
+        stat = []
+        mini_list = el.find_all('div')
+        for el in mini_list:
+            stat.append(el.text)
+        medium_list.append([stat[1], stat[0], stat[2]])                  #Changes the order of data (more organised)
+    browser.quit()
+    return medium_list
+
 
 def get_match_history(team):
         
@@ -42,24 +65,14 @@ def get_match_history(team):
         game_id = game.get_attribute("id")      #it is used, even though it shows it isnt
         game_links.append("https://www.flashscore.com/match/" + game_id[4:] + "/#match-statistics;0")
 
+    browser.quit()      #We don't need it anymore, we will be opening new ones anyway
+
     #Visits every game stats site and scraps data into lists (huge_list)
-    huge_list = []
-    for page in game_links[:10]:
-        browser.get(page)
-        element = browser.find_elements_by_class_name("statTextGroup")      #Necessary, not sure why
-        soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
-        tag = soup.find_all('div', {"class": "statTextGroup"})
-        imena = soup.find_all('div', {"class": "tname__text"})              #Finds team names
-        match_time = soup.find_all('div', {"class": "description__time"})   #Finds match date and time
-        rezultat = soup.find_all('span', {"class": "scoreboard"})           #Finds match result
-        medium_list = [[imena[0].text.strip(), match_time[0].text.strip(), imena[1].text.strip()],
-        [rezultat[0].text.strip(), "result", rezultat[1].text.strip()]]     #Createst a list for stats
-        for el in tag:      #Loops through all divs with stat. data and extracts it
-            stat = []
-            mini_list = el.find_all('div')
-            for el in mini_list:
-                stat.append(el.text)
-            medium_list.append(stat)
-        huge_list.append(medium_list)
+    stat_list = []
+    for page in game_links[:5]:                  #Changes the order of data (more organised)
+        stat_list.append(get_match_stats(page))
     browser.quit()
-    return huge_list
+    return stat_list
+
+
+
